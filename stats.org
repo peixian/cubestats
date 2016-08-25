@@ -13,19 +13,594 @@ Load mtgjson into the `cards` variable
       cards = json.load(infile)
 
   print(cards['Air Elemental'])
+  print(cards['Ætherling'])
+  print(cards['Far'])
 #+END_SRC
 
 #+RESULTS:
-: {'name': 'Air Elemental', 'imageName': 'air elemental', 'type': 'Creature — Elemental', 'power': '4', 'colorIdentity': ['U'], 'subtypes': ['Elemental'], 'cmc': 5, 'manaCost': '{3}{U}{U}', 'layout': 'normal', 'toughness': '4', 'colors': ['Blue'], 'types': ['Creature'], 'text': 'Flying'}
+: {'manaCost': '{3}{U}{U}', 'name': 'Air Elemental', 'text': 'Flying', 'type': 'Creature — Elemental', 'cmc': 5, 'toughness': '4', 'imageName': 'air elemental', 'types': ['Creature'], 'colorIdentity': ['U'], 'subtypes': ['Elemental'], 'power': '4', 'colors': ['Blue'], 'layout': 'normal'}
+: {'manaCost': '{4}{U}{U}', 'name': 'Ætherling', 'text': "{U}: Exile Ætherling. Return it to the battlefield under its owner's control at the beginning of the next end step.\n{U}: Ætherling can't be blocked this turn.\n{1}: Ætherling gets +1/-1 until end of turn.\n{1}: Ætherling gets -1/+1 until end of turn.", 'type': 'Creature — Shapeshifter', 'cmc': 6, 'toughness': '5', 'imageName': 'ætherling', 'types': ['Creature'], 'colorIdentity': ['U'], 'subtypes': ['Shapeshifter'], 'power': '4', 'colors': ['Blue'], 'layout': 'normal'}
+: {'manaCost': '{1}{U}', 'name': 'Far', 'text': "Return target creature to its owner's hand.\nFuse (You may cast one or both halves of this card from your hand.)", 'colorIdentity': ['B', 'U'], 'layout': 'split', 'cmc': 2, 'type': 'Instant', 'colors': ['Blue'], 'imageName': 'far', 'types': ['Instant'], 'names': ['Far', 'Away']}
 
 Google sheets api:
 
 #+BEGIN_SRC ipython :session :results output :exports both
   file_id = '1YHYoEoFFiPwH4LG4_34-EIghaphHR1OAT02pgcj595Q'
   sheet_id = '678309503' #individual sheets have ids too
-
+  range_name = 'B8:I540'
   with open('secrets.txt', 'r') as infile:
       API_KEY = infile.read()
 
-  print(API_KEY)
+  SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'
+  API_URL = 'https://sheets.googleapis.com/v4/spreadsheets/{}'
+  import requests
+  params = {'key': API_KEY, 'ranges': range_name, 'fields': 'properties.title,sheets(data.rowData.values(effectiveValue))'}
+  req = requests.get(API_URL.format(file_id), params=params)
+  print(req.status_code)
+  data = req.json()
+  
 #+END_SRC
+
+#+RESULTS:
+: 200
+
+#+BEGIN_SRC ipython :session :results output
+  #print(data['sheets'][0]['data'][0]['rowData'][0])
+  row_data = data['sheets'][0]['data'][0]['rowData']
+  row_data = list(map(lambda x: x['values'], row_data))
+
+  card_list = list(filter(None, [card.get('effectiveValue').get('stringValue') if card.get('effectiveValue') else None for row in row_data for card in row]))
+  print(card_list[:5])
+  print(len(card_list))
+#+END_SRC
+
+
+#+RESULTS:
+: ['Ajani, Caller of the Pride', 'Aetherling', 'Bile Blight', 'Abbot of Keral Keep', 'Acidic Slime']
+: 506
+
+#+BEGIN_SRC ipython :session :results output :exports both
+  import re
+  q_filter = re.compile('[?]')
+  card_list = list(map(lambda x: q_filter.sub('', x), card_list))
+  print(card_list[:5])
+#+END_SRC
+
+#+RESULTS:
+: ['Ajani, Caller of the Pride', 'Aetherling', 'Bile Blight', 'Abbot of Keral Keep', 'Acidic Slime']
+
+
+#+BEGIN_SRC ipython :session :results output :exports both
+  cube_list = []
+  for card_name in card_list:
+      card_name = card_name.strip()
+      if 'Aether' in card_name: #what idiot thought it would be funny to use weird UTF8 encoding on this
+          card_name = card_name.replace('Aether', 'Æther')
+      split_card = False
+      if '/' in card_name: #what idiot thought it would be funny to split up split cards
+          split_card = True
+      if split_card:
+          card_info = [cards[card_name.split('/')[0]], cards[card_name.split('/')[1]]]
+      else:
+          card_info = [cards[card_name]]
+      for card_in in card_info:
+          print(card_in['color'])
+          #cube_list.append({'name': card_in['name'], 'cmc': card_in['cmc'], 'color': card_in['colors'] if len(card_in['colors']) == 1 else 'Multicolored', 'text': card_in['text']})
+  cube_list = pd.DataFrame(cube_list)
+  print(cube_list)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+Ajani, Caller of the Pride
+Ætherling
+Bile Blight
+Abbot of Keral Keep
+Acidic Slime
+Abrupt Decay
+Bant Panorama
+Adventuring Gear
+Angel of Glory's Rise
+Ancestral Vision
+Bitterblossom
+Anger of the Gods
+Arbor Colossus
+Abzan Charm
+Esper Panorama
+Arcbound Ravager
+Archangel Avacyn
+Augur of Bolas
+Black Sun's Zenith
+Arc Trail
+Arbor Elf
+Advent of the Wurm
+Grixis Panorama
+Basilisk Collar
+Banisher Priest
+Bident of Thassa
+Blood Artist
+Ash Zealot
+Avenger of Zendikar
+Ajani Vengeant
+Jund Panorama
+Batterskull
+Banishing Light
+Blue Sun's Zenith
+Collective Brutality
+Blasphemous Act
+Become Immense
+Ajani, Mentor of Heroes
+Naya Panorama
+Cloudstone Curio
+Bathe in Light
+Body Double
+Consume the Meek
+Bonfire of the Damned
+Birthing Pod
+Atarka's Command
+Flood Plain
+Eldrazi Conscription
+Blade Splicer
+Boomerang
+Dark Confidant
+Chandra, Pyromaster
+Blisterpod
+Azorius Charm
+Bad River
+Elixir of Immortality
+Brave the Elements
+Broken Ambitions
+Dark Petition
+Chandra's Phoenix
+Chord of Calling
+Behemoth Sledge
+Rocky Tar Pit
+Everflowing Chalice
+Brimaz, King of Oreskos
+Careful Consideration
+Dead Weight
+Char
+Collected Company
+Blightning
+Mountain Valley
+Hangarback Walker
+Celestial Purge
+Clash of Wills
+Desecration Demon
+Cunning Sparkmage
+Courser of Kruphix
+Blood Baron of Vizkopa
+Grasslands
+Lotus Bloom
+Champion of the Parish
+Cloudfin Raptor
+Devour Flesh
+Dragon Fodder
+Craterhoof Behemoth
+Bloodbraid Elf
+Celestial Colonnade
+Memnite
+Cloudgoat Ranger
+Compulsive Research
+Diregraf Ghoul
+Dragonmaster Outcast
+Cryptolith Rite
+Boros Charm
+Creeping Tar Pit
+Mind Stone
+Day of Judgment
+Counterbalance
+Dismember
+Eidolon of the Great Revel
+Deathmist Raptor
+Boros Reckoner
+Lavaclaw Reaches
+Mortarpod
+Disenchant
+Counterspell
+Doom Blade
+Exquisite Firecraft
+Den Protector
+Broodmate Dragon
+Raging Ravine
+Mox Opal
+Doomed Traveler
+Cryptic Command
+Duress
+Fanatic of Mogis
+Duskwatch Recruiter
+Burning-Tree Emissary
+Stirring Wildwood
+Ornithopter
+Elesh Norn, Grand Cenobite
+Cyclonic Rift
+Erebos, God of the Dead
+Fiery Impulse
+Elvish Archdruid
+Cartel Aristocrat
+Shambling Vent
+Pithing Needle
+Elite Vanguard
+Deceiver Exarch
+Geralf's Messenger
+Firedrinker Satyr
+Elvish Visionary
+Catacomb Sifter
+Wandering Fumarole
+Prophetic Prism
+Elspeth, Knight-Errant
+Delver of Secrets
+Go for the Throat
+Flames of the Blood Hand
+Evolutionary Leap
+Centaur Healer
+Hissing Quagmire
+Ratchet Bomb
+Elspeth, Sun's Champion
+Deprive
+Grasp of Darkness
+Foundry Street Denizen
+Experiment One
+Cruel Ultimatum
+Needle Spires
+Sensei's Divining Top
+Ethersworn Canonist
+Dig Through Time
+Grave Titan
+Frenzied Goblin
+Explore
+Detention Sphere
+Lumbering Falls
+Signal Pest
+Expedition Envoy
+Dispel
+Gray Merchant of Asphodel
+Galvanic Blast
+Explore
+Domri Rade
+Temple of Silence
+Solemn Simulacrum
+Fabled Hero
+Disperse
+Hand of Cruelty
+Goblin Guide
+Farseek
+Dragonlord Atarka
+Temple of Epiphany
+Sphere of the Suns
+Fiend Hunter
+Dissipate
+Heartless Summoning
+Goblin Heelcutter
+Fauna Shaman
+Dragonlord Ojutai
+Temple of Malady
+Sword of Body and Mind
+Fiendslayer Paladin
+Dissolve
+Hero's Downfall
+Goblin Rabblemaster
+Flinthoof Boar
+Dragonlord Silumgar
+Temple of Triumph
+Sword of Feast and Famine
+Geist-Honored Monk
+Divination
+Inquisition of Kozilek
+Greater Gargadon
+Garruk Wildspeaker
+Dreadbore
+Temple of Mystery
+Sword of War and Peace
+Gideon Jura
+Ensoul Artifact
+Kalitas, Traitor of Ghet
+Gut Shot
+Garruk, Caller of Beasts
+Dromoka's Command
+Hallowed Fountain
+Ugin, the Spirit Dragon
+Gideon, Ally of Zendikar
+Gitaxian Probe
+Languish
+Hammer of Purphoros
+Genesis Hydra
+Dryad Militant
+Watery Grave
+Wurmcoil Engine
+Glint Hawk
+Glen Elendra Archmage
+Lifebane Zombie
+Harvest Pyre
+Glimpse of Nature
+Falkenrath Aristocrat
+Blood Crypt
+Springleaf Drum
+Glorious Anthem
+Jace Beleren
+Liliana of the Veil
+Hellrider
+Glistener Elf
+Far
+Away
+Stomping Ground
+Frogmite
+Hanweir Militia Captain
+Jace, Architect of Thought
+Liliana, Heretical Healer
+Hero of Oxid Ridge
+Golgari Grave-Troll
+Figure of Destiny
+Temple Garden
+Myr Enforcer
+Hero of Bladehold
+Jace, the Mind Sculptor
+Maga, Traitor to Mortals
+Hordeling Outburst
+Great Sable Stag
+Fleecemane Lion
+Godless Shrine
+Myr Retriever
+Hidden Dragonslayer
+Jace, Vryn's Prodigy
+Murder
+Inferno Titan
+Green Sun's Zenith
+Frostburn Weird
+Steam Vents
+Isamaru, Hound of Konda
+Mana Leak
+Murderous Cut
+Kird Ape
+Gyre Sage
+Geist of Saint Traft
+Overgrown Tomb
+Relic of Progenitus
+Journey to Nowhere
+Master of Waves
+Nameless Inversion
+Kird Chieftain
+Heartbeat of Spring
+Ghor-Clan Rampager
+Sacred Foundry
+Runechanter's Pike
+Knight of the White Orchid
+Mistbind Clique
+Nantuko Husk
+Koth of the Hammer
+Hedge Troll
+Glissa, the Traitor
+Breeding Pool
+Kytheon, Hero of Akros
+Muddle the Mixture
+Ob Nixilis Reignited
+Lightning Berserker
+Heritage Druid
+Golgari Charm
+Evolving Wilds
+Last Breath
+Mulldrifter
+Pack Rat
+Lightning Bolt
+Imperious Perfect
+Grisly Salvage
+Terramorphic Expanse
+Lingering Souls
+Omenspeaker
+Painful Truths
+Lightning Strike
+Kodama's Reach
+Huntmaster of the Fells
+Blinkmoth Nexus
+Mangara of Corondor
+Phantasmal Image
+Phyrexian Arena
+Magma Jet
+Lotus Cobra
+Izzet Charm
+Inkmoth Nexus
+Mastery of the Unseen
+Ponder
+Profane Command
+Mizzium Mortars
+Melira, Sylvok Outcast
+Jeskai Ascendancy
+Mutavault
+Mikaeus, the Lunarch
+Preordain
+Read the Bones
+Monastery Swiftspear
+Mulch
+Judge's Familiar
+Mirran Crusader
+Rapid Hybridization
+Relentless Dead
+Pillar of Flame
+Mutagenic Growth
+Kitchen Finks
+Vesuva
+Monastery Mentor
+Remand
+Ruinous Path
+Plated Geopede
+Nettle Sentinel
+Knight of the Reliquary
+Kessig Wolf Run
+Oblivion Ring
+Remove Soul
+Shriekmaw
+Purphoros, God of the Forge
+Nissa, Vastwood Seer
+Kolaghan's Command
+Nephalia Drownyard
+Paladin en-Vec
+Rewind
+Sidisi, Undead Vizier
+Pyroclasm
+Nissa, Voice of Zendikar
+Lightning Helix
+Nykthos, Shrine to Nyx
+Path to Exile
+Sage's Dousing
+Sidisi's Pet
+Reckless Waif
+Noble Hierarch
+Lotleth Troll
+Cavern of Souls
+Planar Cleansing
+Scion of Oona
+Skirsdag High Priest
+Red Sun's Zenith
+Oath of Nissa
+Loxodon Smiter
+Valakut, the Molten Pinnacle
+Planar Outburst
+Sleight of Hand
+Tasigur, the Golden Fang
+Sarkhan, the Dragonspeaker
+Polukranos, World Eater
+Maelstrom Pulse
+Precinct Captain
+Snapcaster Mage
+Thoughtseize
+Searing Blood
+Primeval Titan
+Mantis Rider
+Ancient Den
+Puresteel Paladin
+Sower of Temptation
+Tragic Slip
+Searing Spear
+Rattleclaw Mystic
+Mortify
+Darksteel Citadel
+Ranger of Eos
+Spell Pierce
+Ultimate Price
+Shock
+Sakura-Tribe Elder
+Nightveil Specter
+Great Furnace
+Restoration Angel
+Spell Snare
+Unburial Rites
+Simian Spirit Guide
+Savage Punch
+Obzedat, Ghost Council
+Seat of the Synod
+Reveillark
+Spellstutter Sprite
+Undercity Informer
+Skullcrack
+Scavenging Ooze
+Ojutai's Command
+Tree of Tales
+Savannah Lions
+Spreading Seas
+Underworld Connections
+Slagstorm
+Seasons Past
+Olivia Voldaren
+Vault of Whispers
+Secure the Wastes
+Stoic Rebuttal
+Whip of Erebos
+Splinter Twin
+Strangleroot Geist
+Orzhov Charm
+Seeker of the Way
+Syncopate
+Zulaport Cutthroat
+Stoke the Flames
+Sunblade Elf
+Prized Amalgam
+Selfless Spirit
+Tamiyo, the Moon Sage
+Stormbreath Dragon
+Sylvan Advocate
+Putrefy
+Shrieking Grotesque
+Thassa, God of the Sea
+Temur Battle Rage
+Sylvan Caryatid
+Putrid Leech
+Silkwrap
+Think Twice
+Thundermaw Hellkite
+Tarmogoyf
+Qasali Pridemage
+Silverblade Paladin
+Thopter Spy Network
+Titan's Strength
+Terastodon
+Rakdos Cackler
+Soldier of the Pantheon
+Thought Scour
+Volcanic Fallout
+Thragtusk
+Rakdos's Return
+Soulfire Grand Master
+Tidebinder Mage
+Whipflare
+Thrun, the Last Troll
+Reflector Mage
+Spectral Procession
+Treasure Cruise
+Wild Slash
+Tireless Tracker
+Selesnya Charm
+Squadron Hawk
+Treasure Mage
+Young Pyromancer
+Troll Ascetic
+Siege Rhino
+Stasis Snare
+Unsummon
+Zealous Conscripts
+Undercity Troll
+Sin Collector
+Steppe Lynx
+Vapor Snag
+Zurgo Bellstriker
+Vengevine
+Sorin, Solemn Visitor
+Stoneforge Mystic
+Vendilion Clique
+Viridian Emissary
+Sovereigns of Lost Alara
+Student of Warfare
+Venser, Shaper Savant
+Voyaging Satyr
+Spell Queller
+Tempered Steel
+Warden of the First Tree
+Sphinx's Revelation
+Thalia, Guardian of Thraben
+Weird Harvest
+Sprouting Thrinax
+Thalia, Heretic Cathar
+Whisperwood Elemental
+Supreme Verdict
+Thalia's Lieutenant
+Wild Nacatl
+Terminate
+Thraben Inspector
+Wren's Run Vanquisher
+Tezzeret, Agent of Bolas
+Valorous Stance
+The Gitrog Monster
+Weathered Wayfarer
+Tidehollow Sculler
+White Sun's Zenith
+Utter End
+Wingmate Roc
+Voice of Resurgence
+Wrath of God
+Vraska the Unseen
+Warleader's Helix
+Xenagos, the Reveler
+Empty DataFrame
+Columns: []
+Index: []
+#+end_example
+
