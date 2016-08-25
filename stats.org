@@ -24,5 +24,8 @@ Google sheets api:
   file_id = '1YHYoEoFFiPwH4LG4_34-EIghaphHR1OAT02pgcj595Q'
   sheet_id = '678309503' #individual sheets have ids too
 
-  sheet_api = ''
+  with open('secrets.txt', 'r') as infile:
+      API_KEY = infile.read()
+
+  print(API_KEY)
 #+END_SRC
