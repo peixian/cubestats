@@ -1,0 +1,11 @@
+* cubestats
+Small (flask? tornado? python scripts slapped together without concern for memory safety?) application to parse and analyze mtg cubes.
+
+** Dependencies: 
+You'll need all of the following + all of the dependicies these packages require
+- Usual anaconda stuff (pandas, numpy (*probably should be linked to BLAS*), scipy) 
+- Google api python client
+- Maybe NLTK/Gensim/FastText later for parsing of mechanics
+
+** Credientials:
+- To use google sheets with this you'll need some credientials: https://developers.google.com/sheets/quickstart/python

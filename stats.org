@@ -1,0 +1,28 @@
+#+BEGIN_SRC ipython :session :exports both
+  import pandas as pd
+  import numpy as np
+  import json
+#+END_SRC
+
+#+RESULTS:
+
+Load mtgjson into the `cards` variable
+
+#+BEGIN_SRC ipython :session :results output :exports both
+  with open('./allcards.json') as infile:
+      cards = json.load(infile)
+
+  print(cards['Air Elemental'])
+#+END_SRC
+
+#+RESULTS:
+: {'name': 'Air Elemental', 'imageName': 'air elemental', 'type': 'Creature — Elemental', 'power': '4', 'colorIdentity': ['U'], 'subtypes': ['Elemental'], 'cmc': 5, 'manaCost': '{3}{U}{U}', 'layout': 'normal', 'toughness': '4', 'colors': ['Blue'], 'types': ['Creature'], 'text': 'Flying'}
+
+Google sheets api:
+
+#+BEGIN_SRC ipython :session :results output :exports both
+  file_id = '1YHYoEoFFiPwH4LG4_34-EIghaphHR1OAT02pgcj595Q'
+  sheet_id = '678309503' #individual sheets have ids too
+
+  sheet_api = ''
+#+END_SRC
