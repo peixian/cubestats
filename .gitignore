@@ -156,4 +156,4 @@ ENV/
 # Rope project settings
 .ropeproject
 
-secrets.py
+secrets.txt
