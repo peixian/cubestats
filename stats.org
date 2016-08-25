@@ -72,6 +72,19 @@ Google sheets api:
 
 #+BEGIN_SRC ipython :session :results output :exports both
   cube_list = []
+
+  def parse_color(colors, card_type):
+      if 'Land' in card_type:
+          return 'Land'
+      elif colors == None:
+          return 'Colorless'
+      elif len(colors) == 1:
+          return colors[0]
+      elif len(colors) > 1:
+          return 'Multicolored'
+      else:
+          return 'ERROR'
+
   for card_name in card_list:
       card_name = card_name.strip()
       if 'Aether' in card_name: #what idiot thought it would be funny to use weird UTF8 encoding on this
@@ -84,523 +97,108 @@ Google sheets api:
       else:
           card_info = [cards[card_name]]
       for card_in in card_info:
-          print(card_in['color'])
-          #cube_list.append({'name': card_in['name'], 'cmc': card_in['cmc'], 'color': card_in['colors'] if len(card_in['colors']) == 1 else 'Multicolored', 'text': card_in['text']})
+          cube_list.append({'name': card_in['name'], 'cmc': card_in.get('cmc'), 'color': parse_color(card_in.get('colors'), card_in['type']), 'text': card_in.get('text')})
   cube_list = pd.DataFrame(cube_list)
-  print(cube_list)
+  print(cube_list.head())
 #+END_SRC
 
 #+RESULTS:
 #+begin_example
-Ajani, Caller of the Pride
-Ætherling
-Bile Blight
-Abbot of Keral Keep
-Acidic Slime
-Abrupt Decay
-Bant Panorama
-Adventuring Gear
-Angel of Glory's Rise
-Ancestral Vision
-Bitterblossom
-Anger of the Gods
-Arbor Colossus
-Abzan Charm
-Esper Panorama
-Arcbound Ravager
-Archangel Avacyn
-Augur of Bolas
-Black Sun's Zenith
-Arc Trail
-Arbor Elf
-Advent of the Wurm
-Grixis Panorama
-Basilisk Collar
-Banisher Priest
-Bident of Thassa
-Blood Artist
-Ash Zealot
-Avenger of Zendikar
-Ajani Vengeant
-Jund Panorama
-Batterskull
-Banishing Light
-Blue Sun's Zenith
-Collective Brutality
-Blasphemous Act
-Become Immense
-Ajani, Mentor of Heroes
-Naya Panorama
-Cloudstone Curio
-Bathe in Light
-Body Double
-Consume the Meek
-Bonfire of the Damned
-Birthing Pod
-Atarka's Command
-Flood Plain
-Eldrazi Conscription
-Blade Splicer
-Boomerang
-Dark Confidant
-Chandra, Pyromaster
-Blisterpod
-Azorius Charm
-Bad River
-Elixir of Immortality
-Brave the Elements
-Broken Ambitions
-Dark Petition
-Chandra's Phoenix
-Chord of Calling
-Behemoth Sledge
-Rocky Tar Pit
-Everflowing Chalice
-Brimaz, King of Oreskos
-Careful Consideration
-Dead Weight
-Char
-Collected Company
-Blightning
-Mountain Valley
-Hangarback Walker
-Celestial Purge
-Clash of Wills
-Desecration Demon
-Cunning Sparkmage
-Courser of Kruphix
-Blood Baron of Vizkopa
-Grasslands
-Lotus Bloom
-Champion of the Parish
-Cloudfin Raptor
-Devour Flesh
-Dragon Fodder
-Craterhoof Behemoth
-Bloodbraid Elf
-Celestial Colonnade
-Memnite
-Cloudgoat Ranger
-Compulsive Research
-Diregraf Ghoul
-Dragonmaster Outcast
-Cryptolith Rite
-Boros Charm
-Creeping Tar Pit
-Mind Stone
-Day of Judgment
-Counterbalance
-Dismember
-Eidolon of the Great Revel
-Deathmist Raptor
-Boros Reckoner
-Lavaclaw Reaches
-Mortarpod
-Disenchant
-Counterspell
-Doom Blade
-Exquisite Firecraft
-Den Protector
-Broodmate Dragon
-Raging Ravine
-Mox Opal
-Doomed Traveler
-Cryptic Command
-Duress
-Fanatic of Mogis
-Duskwatch Recruiter
-Burning-Tree Emissary
-Stirring Wildwood
-Ornithopter
-Elesh Norn, Grand Cenobite
-Cyclonic Rift
-Erebos, God of the Dead
-Fiery Impulse
-Elvish Archdruid
-Cartel Aristocrat
-Shambling Vent
-Pithing Needle
-Elite Vanguard
-Deceiver Exarch
-Geralf's Messenger
-Firedrinker Satyr
-Elvish Visionary
-Catacomb Sifter
-Wandering Fumarole
-Prophetic Prism
-Elspeth, Knight-Errant
-Delver of Secrets
-Go for the Throat
-Flames of the Blood Hand
-Evolutionary Leap
-Centaur Healer
-Hissing Quagmire
-Ratchet Bomb
-Elspeth, Sun's Champion
-Deprive
-Grasp of Darkness
-Foundry Street Denizen
-Experiment One
-Cruel Ultimatum
-Needle Spires
-Sensei's Divining Top
-Ethersworn Canonist
-Dig Through Time
-Grave Titan
-Frenzied Goblin
-Explore
-Detention Sphere
-Lumbering Falls
-Signal Pest
-Expedition Envoy
-Dispel
-Gray Merchant of Asphodel
-Galvanic Blast
-Explore
-Domri Rade
-Temple of Silence
-Solemn Simulacrum
-Fabled Hero
-Disperse
-Hand of Cruelty
-Goblin Guide
-Farseek
-Dragonlord Atarka
-Temple of Epiphany
-Sphere of the Suns
-Fiend Hunter
-Dissipate
-Heartless Summoning
-Goblin Heelcutter
-Fauna Shaman
-Dragonlord Ojutai
-Temple of Malady
-Sword of Body and Mind
-Fiendslayer Paladin
-Dissolve
-Hero's Downfall
-Goblin Rabblemaster
-Flinthoof Boar
-Dragonlord Silumgar
-Temple of Triumph
-Sword of Feast and Famine
-Geist-Honored Monk
-Divination
-Inquisition of Kozilek
-Greater Gargadon
-Garruk Wildspeaker
-Dreadbore
-Temple of Mystery
-Sword of War and Peace
-Gideon Jura
-Ensoul Artifact
-Kalitas, Traitor of Ghet
-Gut Shot
-Garruk, Caller of Beasts
-Dromoka's Command
-Hallowed Fountain
-Ugin, the Spirit Dragon
-Gideon, Ally of Zendikar
-Gitaxian Probe
-Languish
-Hammer of Purphoros
-Genesis Hydra
-Dryad Militant
-Watery Grave
-Wurmcoil Engine
-Glint Hawk
-Glen Elendra Archmage
-Lifebane Zombie
-Harvest Pyre
-Glimpse of Nature
-Falkenrath Aristocrat
-Blood Crypt
-Springleaf Drum
-Glorious Anthem
-Jace Beleren
-Liliana of the Veil
-Hellrider
-Glistener Elf
-Far
-Away
-Stomping Ground
-Frogmite
-Hanweir Militia Captain
-Jace, Architect of Thought
-Liliana, Heretical Healer
-Hero of Oxid Ridge
-Golgari Grave-Troll
-Figure of Destiny
-Temple Garden
-Myr Enforcer
-Hero of Bladehold
-Jace, the Mind Sculptor
-Maga, Traitor to Mortals
-Hordeling Outburst
-Great Sable Stag
-Fleecemane Lion
-Godless Shrine
-Myr Retriever
-Hidden Dragonslayer
-Jace, Vryn's Prodigy
-Murder
-Inferno Titan
-Green Sun's Zenith
-Frostburn Weird
-Steam Vents
-Isamaru, Hound of Konda
-Mana Leak
-Murderous Cut
-Kird Ape
-Gyre Sage
-Geist of Saint Traft
-Overgrown Tomb
-Relic of Progenitus
-Journey to Nowhere
-Master of Waves
-Nameless Inversion
-Kird Chieftain
-Heartbeat of Spring
-Ghor-Clan Rampager
-Sacred Foundry
-Runechanter's Pike
-Knight of the White Orchid
-Mistbind Clique
-Nantuko Husk
-Koth of the Hammer
-Hedge Troll
-Glissa, the Traitor
-Breeding Pool
-Kytheon, Hero of Akros
-Muddle the Mixture
-Ob Nixilis Reignited
-Lightning Berserker
-Heritage Druid
-Golgari Charm
-Evolving Wilds
-Last Breath
-Mulldrifter
-Pack Rat
-Lightning Bolt
-Imperious Perfect
-Grisly Salvage
-Terramorphic Expanse
-Lingering Souls
-Omenspeaker
-Painful Truths
-Lightning Strike
-Kodama's Reach
-Huntmaster of the Fells
-Blinkmoth Nexus
-Mangara of Corondor
-Phantasmal Image
-Phyrexian Arena
-Magma Jet
-Lotus Cobra
-Izzet Charm
-Inkmoth Nexus
-Mastery of the Unseen
-Ponder
-Profane Command
-Mizzium Mortars
-Melira, Sylvok Outcast
-Jeskai Ascendancy
-Mutavault
-Mikaeus, the Lunarch
-Preordain
-Read the Bones
-Monastery Swiftspear
-Mulch
-Judge's Familiar
-Mirran Crusader
-Rapid Hybridization
-Relentless Dead
-Pillar of Flame
-Mutagenic Growth
-Kitchen Finks
-Vesuva
-Monastery Mentor
-Remand
-Ruinous Path
-Plated Geopede
-Nettle Sentinel
-Knight of the Reliquary
-Kessig Wolf Run
-Oblivion Ring
-Remove Soul
-Shriekmaw
-Purphoros, God of the Forge
-Nissa, Vastwood Seer
-Kolaghan's Command
-Nephalia Drownyard
-Paladin en-Vec
-Rewind
-Sidisi, Undead Vizier
-Pyroclasm
-Nissa, Voice of Zendikar
-Lightning Helix
-Nykthos, Shrine to Nyx
-Path to Exile
-Sage's Dousing
-Sidisi's Pet
-Reckless Waif
-Noble Hierarch
-Lotleth Troll
-Cavern of Souls
-Planar Cleansing
-Scion of Oona
-Skirsdag High Priest
-Red Sun's Zenith
-Oath of Nissa
-Loxodon Smiter
-Valakut, the Molten Pinnacle
-Planar Outburst
-Sleight of Hand
-Tasigur, the Golden Fang
-Sarkhan, the Dragonspeaker
-Polukranos, World Eater
-Maelstrom Pulse
-Precinct Captain
-Snapcaster Mage
-Thoughtseize
-Searing Blood
-Primeval Titan
-Mantis Rider
-Ancient Den
-Puresteel Paladin
-Sower of Temptation
-Tragic Slip
-Searing Spear
-Rattleclaw Mystic
-Mortify
-Darksteel Citadel
-Ranger of Eos
-Spell Pierce
-Ultimate Price
-Shock
-Sakura-Tribe Elder
-Nightveil Specter
-Great Furnace
-Restoration Angel
-Spell Snare
-Unburial Rites
-Simian Spirit Guide
-Savage Punch
-Obzedat, Ghost Council
-Seat of the Synod
-Reveillark
-Spellstutter Sprite
-Undercity Informer
-Skullcrack
-Scavenging Ooze
-Ojutai's Command
-Tree of Tales
-Savannah Lions
-Spreading Seas
-Underworld Connections
-Slagstorm
-Seasons Past
-Olivia Voldaren
-Vault of Whispers
-Secure the Wastes
-Stoic Rebuttal
-Whip of Erebos
-Splinter Twin
-Strangleroot Geist
-Orzhov Charm
-Seeker of the Way
-Syncopate
-Zulaport Cutthroat
-Stoke the Flames
-Sunblade Elf
-Prized Amalgam
-Selfless Spirit
-Tamiyo, the Moon Sage
-Stormbreath Dragon
-Sylvan Advocate
-Putrefy
-Shrieking Grotesque
-Thassa, God of the Sea
-Temur Battle Rage
-Sylvan Caryatid
-Putrid Leech
-Silkwrap
-Think Twice
-Thundermaw Hellkite
-Tarmogoyf
-Qasali Pridemage
-Silverblade Paladin
-Thopter Spy Network
-Titan's Strength
-Terastodon
-Rakdos Cackler
-Soldier of the Pantheon
-Thought Scour
-Volcanic Fallout
-Thragtusk
-Rakdos's Return
-Soulfire Grand Master
-Tidebinder Mage
-Whipflare
-Thrun, the Last Troll
-Reflector Mage
-Spectral Procession
-Treasure Cruise
-Wild Slash
-Tireless Tracker
-Selesnya Charm
-Squadron Hawk
-Treasure Mage
-Young Pyromancer
-Troll Ascetic
-Siege Rhino
-Stasis Snare
-Unsummon
-Zealous Conscripts
-Undercity Troll
-Sin Collector
-Steppe Lynx
-Vapor Snag
-Zurgo Bellstriker
-Vengevine
-Sorin, Solemn Visitor
-Stoneforge Mystic
-Vendilion Clique
-Viridian Emissary
-Sovereigns of Lost Alara
-Student of Warfare
-Venser, Shaper Savant
-Voyaging Satyr
-Spell Queller
-Tempered Steel
-Warden of the First Tree
-Sphinx's Revelation
-Thalia, Guardian of Thraben
-Weird Harvest
-Sprouting Thrinax
-Thalia, Heretic Cathar
-Whisperwood Elemental
-Supreme Verdict
-Thalia's Lieutenant
-Wild Nacatl
-Terminate
-Thraben Inspector
-Wren's Run Vanquisher
-Tezzeret, Agent of Bolas
-Valorous Stance
-The Gitrog Monster
-Weathered Wayfarer
-Tidehollow Sculler
-White Sun's Zenith
-Utter End
-Wingmate Roc
-Voice of Resurgence
-Wrath of God
-Vraska the Unseen
-Warleader's Helix
-Xenagos, the Reveler
-Empty DataFrame
-Columns: []
-Index: []
+   cmc  color                        name  \
+0  3.0  White  Ajani, Caller of the Pride   
+1  6.0   Blue                   Ætherling   
+2  2.0  Black                 Bile Blight   
+3  2.0    Red         Abbot of Keral Keep   
+4  5.0  Green                Acidic Slime   
+
+                                                text  
+0  +1: Put a +1/+1 counter on up to one target cr...  
+1  {U}: Exile Ætherling. Return it to the battlef...  
+2  Target creature and all other creatures with t...  
+3  Prowess (Whenever you cast a noncreature spell...  
+4  Deathtouch (Any amount of damage this deals to...  
+#+end_example
+
+#+BEGIN_SRC ipython :session :results output :exports both
+  print(cube_list['color'].unique())
+  print(cube_list[cube_list['color'] == 'Colorless'].head())
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+['White' 'Blue' 'Black' 'Red' 'Green' 'Multicolored' 'Land' 'Colorless']
+     cmc      color                       name  \
+7    1.0  Colorless           Adventuring Gear   
+15   2.0  Colorless           Arcbound Ravager   
+23   1.0  Colorless            Basilisk Collar   
+31   5.0  Colorless                Batterskull   
+39   3.0  Colorless           Cloudstone Curio   
+47   8.0  Colorless       Eldrazi Conscription   
+52   1.0  Colorless                 Blisterpod   
+55   1.0  Colorless      Elixir of Immortality   
+63   0.0  Colorless        Everflowing Chalice   
+71   0.0  Colorless          Hangarback Walker   
+79   NaN  Colorless                Lotus Bloom   
+87   0.0  Colorless                    Memnite   
+95   2.0  Colorless                 Mind Stone   
+103  2.0  Colorless                  Mortarpod   
+111  0.0  Colorless                   Mox Opal   
+119  0.0  Colorless                Ornithopter   
+127  1.0  Colorless             Pithing Needle   
+133  3.0  Colorless            Catacomb Sifter   
+135  2.0  Colorless            Prophetic Prism   
+143  2.0  Colorless               Ratchet Bomb   
+151  1.0  Colorless      Sensei's Divining Top   
+159  1.0  Colorless                Signal Pest   
+167  4.0  Colorless          Solemn Simulacrum   
+175  2.0  Colorless         Sphere of the Suns   
+183  3.0  Colorless     Sword of Body and Mind   
+191  3.0  Colorless  Sword of Feast and Famine   
+199  3.0  Colorless     Sword of War and Peace   
+207  8.0  Colorless    Ugin, the Spirit Dragon   
+215  6.0  Colorless            Wurmcoil Engine   
+223  1.0  Colorless            Springleaf Drum   
+232  4.0  Colorless                   Frogmite   
+240  7.0  Colorless               Myr Enforcer   
+248  2.0  Colorless              Myr Retriever   
+263  1.0  Colorless        Relic of Progenitus   
+271  2.0  Colorless         Runechanter's Pike   
+
+                                                  text  
+7    Landfall — Whenever a land enters the battlefi...  
+15   Sacrifice an artifact: Put a +1/+1 counter on ...  
+23   Equipped creature has deathtouch and lifelink....  
+31   Living weapon (When this Equipment enters the ...  
+39   Whenever a nonartifact permanent enters the ba...  
+47   Enchant creature\nEnchanted creature gets +10/...  
+52   Devoid (This card has no color.)\nWhen Blister...  
+55   {2}, {T}: You gain 5 life. Shuffle Elixir of I...  
+63   Multikicker {2} (You may pay an additional {2}...  
+71   Hangarback Walker enters the battlefield with ...  
+79   Suspend 3—{0} (Rather than cast this card from...  
+87                                                None  
+95   {T}: Add {C} to your mana pool.\n{1}, {T}, Sac...  
+103  Living weapon (When this Equipment enters the ...  
+111  Metalcraft — {T}: Add one mana of any color to...  
+119  Flying (This creature can't be blocked except ...  
+127  As Pithing Needle enters the battlefield, name...  
+133  Devoid (This card has no color.)\nWhen Catacom...  
+135  When Prophetic Prism enters the battlefield, d...  
+143  {T}: Put a charge counter on Ratchet Bomb.\n{T...  
+151  {1}: Look at the top three cards of your libra...  
+159  Battle cry (Whenever this creature attacks, ea...  
+167  When Solemn Simulacrum enters the battlefield,...  
+175  Sphere of the Suns enters the battlefield tapp...  
+183  Equipped creature gets +2/+2 and has protectio...  
+191  Equipped creature gets +2/+2 and has protectio...  
+199  Equipped creature gets +2/+2 and has protectio...  
+207  +2: Ugin, the Spirit Dragon deals 3 damage to ...  
+215  Deathtouch, lifelink\nWhen Wurmcoil Engine die...  
+223  {T}, Tap an untapped creature you control: Add...  
+232  Affinity for artifacts (This spell costs {1} l...  
+240  Affinity for artifacts (This spell costs {1} l...  
+248  When Myr Retriever dies, return another target...  
+263  {T}: Target player exiles a card from his or h...  
+271  Equipped creature has first strike and gets +X...  
 #+end_example
 
